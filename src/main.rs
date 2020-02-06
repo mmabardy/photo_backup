@@ -36,7 +36,6 @@ fn example_copy() -> Result<()> {
     assert!(file1.exists());
     assert!(file2.exists());
 
-
     let mut options = CopyOptions::new();
     options.buffer_size = 536870912;
     let (tx, rx) = mpsc::channel();
