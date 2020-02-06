@@ -3,11 +3,13 @@
 
 extern crate fs_extra;
 extern crate twox_hash;
+extern crate chrono;
 
 // Bring in standard components
 use std::path::Path;
 use std::{thread, time};
 use std::sync::mpsc::{self, TryRecvError};
+use chrono::{DateTime, Local};
 
 // Bring in fs_extra components
 use fs_extra::dir::*;
@@ -16,8 +18,8 @@ use fs_extra::error::*;
 
 fn example_copy() -> Result<()> {
 
-    let path_from = Path::new("./temp");
-    let path_to = path_from.join("out");
+    let path_from = Path::new("D:\\test");
+    let path_to = Path::new("D:\\out");
     let test_folder = path_from.join("test_folder");
     let dir = test_folder.join("dir");
     let sub = dir.join("sub");
@@ -36,7 +38,7 @@ fn example_copy() -> Result<()> {
 
 
     let mut options = CopyOptions::new();
-    options.buffer_size = 2147483648;
+    options.buffer_size = 536870912;
     let (tx, rx) = mpsc::channel();
     thread::spawn(move || {
         let handler = |process_info: TransitProcess| {
@@ -64,6 +66,14 @@ fn example_copy() -> Result<()> {
     Ok(())
 
 }
+
+fn current_date_time() -> std::string::String {
+    let now: DateTime<Local> = Local::now();
+    let now = now.format("%Y-%m-%dT%H%M").to_string();
+    return now;
+}
+
 fn main() {
     example_copy();
+    println!("{}", current_date_time());
 }
