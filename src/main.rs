@@ -9,28 +9,41 @@ extern crate chrono;
 use std::path::Path;
 use std::{thread, time};
 use std::sync::mpsc::{self, TryRecvError};
-use chrono::{DateTime, Local};
+use std::hash::BuildHasherDefault;
+use std::collections::HashMap;
 
 // Bring in fs_extra components
 use fs_extra::dir::*;
 use fs_extra::error::*;
 
+// Bring in chrono components
+use chrono::{DateTime, Local};
+
+// Bring in twox_hash components
+use twox_hash::XxHash64;
+
 
 fn example_copy() -> Result<()> {
-
+    // Source and destination folders, creates if doesn't exist
     let path_from = Path::new("D:\\test");
     let path_to = Path::new("D:\\out");
+    // Creates 3 folders under source folder: path_from\test_folder\dir\sub
     let test_folder = path_from.join("test_folder");
     let dir = test_folder.join("dir");
     let sub = dir.join("sub");
+    // Creates file under dir: path_from\test_folder\dir\file1.txt
     let file1 = dir.join("file1.txt");
+    // Creates file under sub: path_from\test_folder\dir\sub\file2.txt
     let file2 = sub.join("file2.txt");
 
+    // Recursively creates source folder structure and destination folder
     create_all(&sub, true)?;
     create_all(&path_to, true)?;
+    // Writes string into new files (file1 and file 2)
     fs_extra::file::write_all(&file1, "content1")?;
     fs_extra::file::write_all(&file2, "content2")?;
 
+    // Checks if files and folders created successfully, panics if false
     assert!(dir.exists());
     assert!(sub.exists());
     assert!(file1.exists());
@@ -66,6 +79,14 @@ fn example_copy() -> Result<()> {
 
 }
 
+// Test hashing function
+fn hash_test() {
+    
+}
+
+// Get current date and time, local to host machine
+// Formatted to be safe for use as folder name as: YEAR-MONTH-DAYTHOURSMINUTES
+// ex: 2020-02-06T1600 (Feb 6th 2020, 4PM)
 fn current_date_time() -> std::string::String {
     let now: DateTime<Local> = Local::now();
     let now = now.format("%Y-%m-%dT%H%M").to_string();
@@ -75,4 +96,5 @@ fn current_date_time() -> std::string::String {
 fn main() {
     example_copy();
     println!("{}", current_date_time());
+    //hash_test();
 }
