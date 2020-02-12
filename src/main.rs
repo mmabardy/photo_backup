@@ -4,6 +4,7 @@
 extern crate fs_extra;
 extern crate twox_hash;
 extern crate chrono;
+extern crate regex;
 
 // Bring in standard components
 use std::path::Path;
@@ -11,6 +12,7 @@ use std::{thread, time};
 use std::sync::mpsc::{self, TryRecvError};
 use std::hash::BuildHasherDefault;
 use std::collections::HashMap;
+use std::io;
 
 // Bring in fs_extra components
 use fs_extra::dir::*;
@@ -21,6 +23,9 @@ use chrono::{DateTime, Local};
 
 // Bring in twox_hash components
 use twox_hash::XxHash64;
+
+// Bring in regex components
+use regex::Regex;
 
 
 fn example_copy() -> Result<()> {
@@ -79,10 +84,10 @@ fn example_copy() -> Result<()> {
 
 }
 
-// Test hashing function
+/* Test hashing function
 fn hash_test() {
     
-}
+} */
 
 // Get current date and time, local to host machine
 // Formatted to be safe for use as folder name as: YEAR-MONTH-DAYTHOURSMINUTES
@@ -90,11 +95,49 @@ fn hash_test() {
 fn current_date_time() -> std::string::String {
     let now: DateTime<Local> = Local::now();
     let now = now.format("%Y-%m-%dT%H%M").to_string();
-    return now;
+    now
+}
+
+// This is super kludgey, I want this to error out if the match fails
+// Currently only matches file/folder structure for windows
+fn folder_picker() -> std::string::String {
+    let mut folder = String::new();
+    
+    let fail = "FAILED";
+
+    io::stdin()
+            .read_line(&mut folder)
+            .expect("Failed to read line");
+
+    let trimmed = folder.trim();
+
+    let test: bool = check_folder_valid(trimmed);
+
+    if test {
+        //println!("DEBUG Folder choice: {}", trimmed.to_string());
+        return trimmed.to_string();
+    } else {
+        //println!("DEBUG Folder choice: {} is invalid", trimmed.to_string());
+        return fail.to_string();
+    }
+}
+
+fn check_folder_valid(folder_input: &str) -> bool {
+    let windows_re = Regex::new(r"^[a-zA-Z]:\\[\\\S|*\S]?.*$").unwrap();
+    let linux_re = Regex::new(r"^(/[^/ ]*)+/?$").unwrap();
+    let test: bool = (windows_re.is_match(folder_input)) || (linux_re.is_match(folder_input));
+    test
 }
 
 fn main() {
-    example_copy();
+    //example_copy();
     println!("{}", current_date_time());
+    println!("Input a source folder: ");
+    let source = folder_picker();
+    println!("Input a destination folder: ");
+    let destination = folder_picker();
+
+    println!("Source is: {}", source);
+    println!("Destination is: {}", destination);
     //hash_test();
 }
