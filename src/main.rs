@@ -129,13 +129,69 @@ fn check_folder_valid(folder_input: &str) -> bool {
     test
 }
 
+fn copy_files(source_folder: &str, dest_folder: &str, date_time: &str) -> Result<()> {
+    let source = Path::new(source_folder);
+    let dest = Path::new(dest_folder);
+    let mut options = CopyOptions::new();
+    options.buffer_size = 134217728;
+
+    assert!(source.exists());
+    assert!(dest.exists());
+
+    let sub = dest.join(date_time);
+    create_all(&sub, true);
+
+    assert!(sub.exists());
+
+    //let (tx, rx) = mpsc::channel();
+    //thread::spawn(move || {
+    //    let handler = |process_info: TransitProcess| {
+    //        tx.send(process_info).unwrap();
+    //        thread::sleep(time::Duration::from_millis(100));
+    //        fs_extra::dir::TransitProcessResult::ContinueOrAbort
+    //    };
+    let handle = |process_info: TransitProcess|  {
+        println!("{}", process_info.total_bytes);
+        fs_extra::dir::TransitProcessResult::ContinueOrAbort
+    };
+        copy_with_progress(&source, &sub, &options, handle).unwrap();
+    //});
+/*
+    loop {
+        match rx.try_recv() {
+            Ok(process_info) => {
+                println!("{} of {} bytes",
+                         process_info.copied_bytes,
+                         process_info.total_bytes);
+            }
+            Err(TryRecvError::Disconnected) => {
+                println!("finished");
+                break;
+            }
+            Err(TryRecvError::Empty) => {}
+        }
+    }
+    */
+    Ok(())
+
+}
+
 fn main() {
     //example_copy();
-    println!("{}", current_date_time());
+
+    let time = current_date_time();
+
+    println!("{}", time);
     println!("Input a source folder: ");
     let source = folder_picker();
     println!("Input a destination folder: ");
     let destination = folder_picker();
+
+    if (source == "FAILED" || destination == "FAILED") {
+        println!("Invalid source or destination")
+    } else {
+        copy_files(&source, &destination, &time);
+    }
 
     println!("Source is: {}", source);
     println!("Destination is: {}", destination);
