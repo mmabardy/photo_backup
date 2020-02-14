@@ -94,35 +94,12 @@ fn copy_files(source_folder: &str, dest_folder: &str, date_time: &str) -> Result
 
     assert!(sub.exists());
 
-    //let (tx, rx) = mpsc::channel();
-    //thread::spawn(move || {
-    //    let handler = |process_info: TransitProcess| {
-    //        tx.send(process_info).unwrap();
-    //        thread::sleep(time::Duration::from_millis(100));
-    //        fs_extra::dir::TransitProcessResult::ContinueOrAbort
-    //    };
     let handle = |process_info: TransitProcess|  {
         println!("{}", process_info.total_bytes);
         fs_extra::dir::TransitProcessResult::ContinueOrAbort
     };
         copy_with_progress(&source, &sub, &options, handle).unwrap();
-    //});
-/*
-    loop {
-        match rx.try_recv() {
-            Ok(process_info) => {
-                println!("{} of {} bytes",
-                         process_info.copied_bytes,
-                         process_info.total_bytes);
-            }
-            Err(TryRecvError::Disconnected) => {
-                println!("finished");
-                break;
-            }
-            Err(TryRecvError::Empty) => {}
-        }
-    }
-    */
+
     Ok(())
 
 }
