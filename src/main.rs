@@ -38,6 +38,12 @@ use regex::Regex;
 fn hash_test() {
     
 } */
+#[allow(dead_code)]
+struct FolderChoice {
+    source: String,
+    dest: String,
+    date_time: String,
+}
 
 // Get current date and time, local to host machine
 // Formatted to be safe for use as folder name as: YEAR-MONTH-DAYTHOURSMINUTES
@@ -114,6 +120,8 @@ fn main() {
     let source = folder_picker();
     println!("Input a destination folder: ");
     let destination = folder_picker();
+
+    
 
     if source == "FAILED" || destination == "FAILED" {
         println!("Invalid source or destination")
