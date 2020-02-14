@@ -1,3 +1,5 @@
+
+
 // Bring in external crates fs_extra and twox_hash
 // More will probably be needed as I disocver which are necessary
 
@@ -8,9 +10,13 @@ extern crate regex;
 
 // Bring in standard components
 use std::path::Path;
+#[allow(unused_imports)]
 use std::{thread, time};
+#[allow(unused_imports)]
 use std::sync::mpsc::{self, TryRecvError};
+#[allow(unused_imports)]
 use std::hash::BuildHasherDefault;
+#[allow(unused_imports)]
 use std::collections::HashMap;
 use std::io;
 
@@ -22,67 +28,11 @@ use fs_extra::error::*;
 use chrono::{DateTime, Local};
 
 // Bring in twox_hash components
+#[allow(unused_imports)]
 use twox_hash::XxHash64;
 
 // Bring in regex components
 use regex::Regex;
-
-
-fn example_copy() -> Result<()> {
-    // Source and destination folders, creates if doesn't exist
-    let path_from = Path::new("D:\\test");
-    let path_to = Path::new("D:\\out");
-    // Creates 3 folders under source folder: path_from\test_folder\dir\sub
-    let test_folder = path_from.join("test_folder");
-    let dir = test_folder.join("dir");
-    let sub = dir.join("sub");
-    // Creates file under dir: path_from\test_folder\dir\file1.txt
-    let file1 = dir.join("file1.txt");
-    // Creates file under sub: path_from\test_folder\dir\sub\file2.txt
-    let file2 = sub.join("file2.txt");
-
-    // Recursively creates source folder structure and destination folder
-    create_all(&sub, true)?;
-    create_all(&path_to, true)?;
-    // Writes string into new files (file1 and file 2)
-    fs_extra::file::write_all(&file1, "content1")?;
-    fs_extra::file::write_all(&file2, "content2")?;
-
-    // Checks if files and folders created successfully, panics if false
-    assert!(dir.exists());
-    assert!(sub.exists());
-    assert!(file1.exists());
-    assert!(file2.exists());
-
-    let mut options = CopyOptions::new();
-    options.buffer_size = 536870912;
-    let (tx, rx) = mpsc::channel();
-    thread::spawn(move || {
-        let handler = |process_info: TransitProcess| {
-            tx.send(process_info).unwrap();
-            thread::sleep(time::Duration::from_millis(100));
-            fs_extra::dir::TransitProcessResult::ContinueOrAbort
-        };
-        copy_with_progress(&test_folder, &path_to, &options, handler).unwrap();
-    });
-
-    loop {
-        match rx.try_recv() {
-            Ok(process_info) => {
-                println!("{} of {} bytes",
-                         process_info.copied_bytes,
-                         process_info.total_bytes);
-            }
-            Err(TryRecvError::Disconnected) => {
-                println!("finished");
-                break;
-            }
-            Err(TryRecvError::Empty) => {}
-        }
-    }
-    Ok(())
-
-}
 
 /* Test hashing function
 fn hash_test() {
@@ -99,7 +49,7 @@ fn current_date_time() -> std::string::String {
 }
 
 // This is super kludgey, I want this to error out if the match fails
-// Currently only matches file/folder structure for windows
+// Currently matches file/folder structure for windows and linux
 fn folder_picker() -> std::string::String {
     let mut folder = String::new();
     
@@ -122,6 +72,7 @@ fn folder_picker() -> std::string::String {
     }
 }
 
+// Should probably do the error handling for checking here, still don't know how lol
 fn check_folder_valid(folder_input: &str) -> bool {
     let windows_re = Regex::new(r"^[a-zA-Z]:\\[\\\S|*\S]?.*$").unwrap();
     let linux_re = Regex::new(r"^(/[^/ ]*)+/?$").unwrap();
@@ -139,7 +90,7 @@ fn copy_files(source_folder: &str, dest_folder: &str, date_time: &str) -> Result
     assert!(dest.exists());
 
     let sub = dest.join(date_time);
-    create_all(&sub, true);
+    create_all(&sub, true).expect("Couldn't create files");
 
     assert!(sub.exists());
 
@@ -187,10 +138,10 @@ fn main() {
     println!("Input a destination folder: ");
     let destination = folder_picker();
 
-    if (source == "FAILED" || destination == "FAILED") {
+    if source == "FAILED" || destination == "FAILED" {
         println!("Invalid source or destination")
     } else {
-        copy_files(&source, &destination, &time);
+        copy_files(&source, &destination, &time).expect("Couldn't copy files");
     }
 
     println!("Source is: {}", source);
