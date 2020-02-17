@@ -1,6 +1,6 @@
-# photo_backup
-CURRENTLY NOT WORKING... AT ALL!
-Basically, it only does what the example from fs_extra does
+# photo_backu
+Currently does some of the things I want
+It takes 2 inputs, generates a date-time stamp and copies all files/folder structure from source to destination
 
 
 A rust program for backing up photos from an SD card to an external media
