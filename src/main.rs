@@ -9,17 +9,8 @@ extern crate chrono;
 extern crate regex;
 extern crate glob;
 // Bring in standard components
-
 #[allow(unused_imports)]
-use std::{thread, time};
-#[allow(unused_imports)]
-use std::sync::mpsc::{self, TryRecvError};
-#[allow(unused_imports)]
-use std::hash::BuildHasherDefault;
-#[allow(unused_imports)]
-use std::collections::HashMap;
-use std::io;
-use std::path::{Path, PathBuf};
+use std::{io, collections::HashMap, path::{Path, PathBuf}};
 use glob::glob;
 
 // Bring in fs_extra components
