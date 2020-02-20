@@ -7,9 +7,9 @@ extern crate fs_extra;
 extern crate twox_hash;
 extern crate chrono;
 extern crate regex;
-
+extern crate glob;
 // Bring in standard components
-use std::path::Path;
+
 #[allow(unused_imports)]
 use std::{thread, time};
 #[allow(unused_imports)]
@@ -19,6 +19,8 @@ use std::hash::BuildHasherDefault;
 #[allow(unused_imports)]
 use std::collections::HashMap;
 use std::io;
+use std::path::{Path, PathBuf};
+use glob::glob;
 
 // Bring in fs_extra components
 use fs_extra::dir::*;
@@ -108,6 +110,26 @@ fn copy_files(source_folder: &str, dest_folder: &str, date_time: &str) -> Result
 
     Ok(())
 
+}
+
+fn search_for_images(folder: &mut String, filetype: String) -> Vec<String> {
+    //Create new vec of strings
+    let mut files = Vec::new();
+    //Create new path and push func args together
+    let mut path = PathBuf::new();
+    path.push(folder);
+    path.push(r"**\*");
+    path.set_extension(filetype);
+
+    for entry in glob(&path.to_string_lossy()).expect("Failed to read glob") {
+        match entry {
+            Ok(path) => {
+                files.push(path.display().to_string());
+            },
+            Err(e) => println!("{:?}", e),
+        }
+    }
+    files
 }
 
 fn main() {
