@@ -1,6 +1,6 @@
 # photo_backup
 Compatibility:
-<ul>Windows</ul>
+<ul><b>Windows</b></ul>
 Currently does some of the things I want:
 It takes 2 inputs, generates a date-time stamp and copies all files/folder structure from source to destination
 
