@@ -8,14 +8,14 @@ extern crate twox_hash;
 extern crate chrono;
 extern crate regex;
 extern crate glob;
+extern crate systemstat;
 // Bring in standard components
 #[allow(unused_imports)]
 use std::{io, collections::HashMap, path::{Path, PathBuf}};
 use glob::glob;
 
 // Bring in fs_extra components
-use fs_extra::dir::*;
-use fs_extra::error::*;
+use fs_extra::{dir::*, error::*};
 
 // Bring in chrono components
 use chrono::{DateTime, Local};
@@ -26,6 +26,9 @@ use twox_hash::XxHash64;
 
 // Bring in regex components
 use regex::Regex;
+
+// Bring in systemstat
+use systemstat::Filesystem;
 
 /* Test hashing function
 fn hash_test() {
@@ -103,7 +106,7 @@ fn copy_files(source_folder: &str, dest_folder: &str, date_time: &str) -> Result
 
 }
 
-fn search_for_images(folder: &mut String, filetype: String) -> Vec<String> {
+fn search_for_files(folder: &mut String, filetype: String) -> Vec<String> {
     //Create new vec of strings
     let mut files = Vec::new();
     //Create new path and push func args together
@@ -121,6 +124,28 @@ fn search_for_images(folder: &mut String, filetype: String) -> Vec<String> {
         }
     }
     files
+}
+
+// Accepts a vector of UNWRAPPED filesystem mounts, returns string of mount with largest size
+fn get_largest_disk(disks: &Vec<Filesystem>) -> Filesystem {
+    // get number of elements in vector
+    let mount_points = disks.len();
+
+    //initialize to temp value of first element in vector
+    let mut largest: Filesystem = disks[0].clone();
+
+    // need to use for loop like this because iter not implemented... or something, idk
+    for x in 0..mount_points-1 {
+        let current = disks[x].clone();
+        let next = disks[x+1].clone();
+        largest = if current.total > next.total {
+            current
+        } else {
+            next
+        };
+    }
+
+    largest
 }
 
 fn main() {
