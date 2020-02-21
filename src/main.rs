@@ -1,5 +1,3 @@
-
-
 // Bring in external crates fs_extra and twox_hash
 // More will probably be needed as I disocver which are necessary
 
@@ -86,7 +84,7 @@ fn copy_files(source_folder: &str, dest_folder: &str, date_time: &str) -> Result
     let source = Path::new(source_folder);
     let dest = Path::new(dest_folder);
     let mut options = CopyOptions::new();
-    options.buffer_size = 134217728;
+    options.buffer_size = 128_000_000; //128MB
 
     assert!(source.exists());
     assert!(dest.exists());
