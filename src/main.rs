@@ -107,20 +107,37 @@ fn copy_files(source_folder: &str, dest_folder: &str, date_time: &str) -> Result
 }
 
 // This currently only works on windows
-fn search_for_files(folder: &mut String, filetype: String) -> Vec<String> {
+fn search_for_files_win(folder: &mut String, filetype: String) -> Vec<String> {
     //Create new vec of strings
     let mut files = Vec::new();
-    //Create new path and push func args together: "Root folder\**\*.filetype"
-    let mut path = PathBuf::new();
-    path.push(folder);
-    path.push(r"**\*");
-    path.set_extension(filetype);
+    //Create new path and push func args together: "DriveRoot\**\*.filetype"
+    let mut win_path = PathBuf::new();
+    win_path.push(folder);
+    win_path.push(r"**\*");
+    win_path.set_extension(filetype);
 
-    for entry in glob(&path.to_string_lossy()).expect("Failed to read glob") {
+    for entry in glob(&win_path.to_string_lossy()).expect("Failed to read glob") {
         match entry {
-            Ok(path) => {
-                files.push(path.display().to_string());
-            },
+            Ok(win_path) => files.push(win_path.display().to_string()),
+            Err(e) => println!("{:?}", e),
+        }
+    }
+    files
+}
+
+//This currently only works for Linux
+fn search_for_files_nux(folder: &mut String, filetype: String) -> Vec<String> {
+    //Create new vec of string
+    let mut files = Vec::new();
+    //Create new path and push func args together: "/mnt/driveroot/**/*.filetype"
+    let mut nux_path = PathBuf::new();
+    nux_path.push(folder);
+    nux_path.push("**/*");
+    nux_path.set_extension(filetype);
+
+    for entry in glob(&nux_path.to_string_lossy()).expect("Failed to read glob") {
+        match entry {
+            Ok(nux_path) => files.push(nux_path.display().to_string()),
             Err(e) => println!("{:?}", e),
         }
     }
