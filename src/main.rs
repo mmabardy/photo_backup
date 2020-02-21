@@ -28,7 +28,7 @@ use twox_hash::XxHash64;
 use regex::Regex;
 
 // Bring in systemstat
-use systemstat::Filesystem;
+use systemstat::{System, Filesystem, Platform};
 
 /* Test hashing function
 fn hash_test() {
@@ -106,10 +106,11 @@ fn copy_files(source_folder: &str, dest_folder: &str, date_time: &str) -> Result
 
 }
 
+// This currently only works on windows
 fn search_for_files(folder: &mut String, filetype: String) -> Vec<String> {
     //Create new vec of strings
     let mut files = Vec::new();
-    //Create new path and push func args together
+    //Create new path and push func args together: "Root folder\**\*.filetype"
     let mut path = PathBuf::new();
     path.push(folder);
     path.push(r"**\*");
@@ -149,15 +150,19 @@ fn get_largest_disk(disks: &Vec<Filesystem>) -> Filesystem {
 }
 
 fn main() {
-    //example_copy();
 
     let time = current_date_time();
 
-    println!("{}", time);
+    println!("---DEBUG--- Current date-time stamp for dest folder: {}", time);
+    let system = System::new();
+    let disks = system.mounts().unwrap();
+    let largest = get_largest_disk(&disks);
+    println!("Recommended target based on disk size is: {}", largest.fs_mounted_on);
     println!("Input a source folder: ");
     let source = folder_picker();
     println!("Input a destination folder: ");
     let destination = folder_picker();
+
 
     
 

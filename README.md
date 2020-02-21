@@ -1,5 +1,7 @@
 # photo_backup
-Currently does some of the things I want
+Compatibility:
+<ul>Windows</ul>
+Currently does some of the things I want:
 It takes 2 inputs, generates a date-time stamp and copies all files/folder structure from source to destination
 
 TODO: verify integrity of files with hashing, and delete files from source that match jp(e)g and RAW files
