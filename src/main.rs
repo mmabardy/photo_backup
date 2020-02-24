@@ -164,6 +164,12 @@ fn get_largest_disk(disks: &Vec<Filesystem>) -> Filesystem {
     largest
 }
 
+fn enumerate_drives(system: System) -> Vec<Filesystem> {
+    let mut disks = system.mounts().unwrap();
+
+    disks
+}
+
 fn main() {
 
     let time = current_date_time();
