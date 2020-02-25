@@ -165,6 +165,7 @@ fn get_largest_disk(disks: &Vec<Filesystem>) -> Filesystem {
 }
 
 // Accepts reference to a System, parses and only returns valid filesystems
+// Println about mounts and sizes could probably be commented out
 fn enumerate_disks(sys: &systemstat::System) -> Vec<systemstat::Filesystem> {
     let mut return_disks = Vec::new();
     match sys.mounts() {
@@ -180,30 +181,43 @@ fn enumerate_disks(sys: &systemstat::System) -> Vec<systemstat::Filesystem> {
     return_disks
 }
 
+fn determine_os(disk: &systemstat::Filesystem) -> String {
+    let mut operating_system = String::new();
+    let windows_re = Regex::new(r"^[a-zA-Z]:\\[\\\S|*\S]?.*$").unwrap();
+    if windows_re.is_match(&disk.fs_mounted_on) {
+        operating_system = String::from("Windows")
+    } else {
+        operating_system = String::from("Linux")
+    }
+    operating_system
+}
+
 fn main() {
 
     let time = current_date_time();
 
     println!("---DEBUG--- Current date-time stamp for dest folder: {}", time);
     let system = System::new();
-    let disks = system.mounts().unwrap();
+    let disks = enumerate_disks(&system);
     let largest = get_largest_disk(&disks);
     println!("Recommended target based on disk size is: {}", largest.fs_mounted_on);
-    println!("Input a source folder: ");
-    let source = folder_picker();
-    println!("Input a destination folder: ");
-    let destination = folder_picker();
+    let operating_system = determine_os(&largest);
+    println!("OS is: {}", operating_system);
+    //println!("Input a source folder: ");
+    //let source = folder_picker();
+    //println!("Input a destination folder: ");
+    //let destination = folder_picker();
 
 
     
 
-    if source == "FAILED" || destination == "FAILED" {
-        println!("Invalid source or destination")
-    } else {
-        copy_files(&source, &destination, &time).expect("Couldn't copy files");
-    }
+    //if source == "FAILED" || destination == "FAILED" {
+    //    println!("Invalid source or destination")
+    //} else {
+    //    copy_files(&source, &destination, &time).expect("Couldn't copy files");
+    //}
 
-    println!("Source is: {}", source);
-    println!("Destination is: {}", destination);
+    //println!("Source is: {}", source);
+    //println!("Destination is: {}", destination);
     //hash_test();
 }
