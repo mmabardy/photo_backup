@@ -164,10 +164,20 @@ fn get_largest_disk(disks: &Vec<Filesystem>) -> Filesystem {
     largest
 }
 
-fn enumerate_drives(system: System) -> Vec<Filesystem> {
-    let mut disks = system.mounts().unwrap();
-
-    disks
+// Accepts reference to a System, parses and only returns valid filesystems
+fn enumerate_disks(sys: &systemstat::System) -> Vec<systemstat::Filesystem> {
+    let mut return_disks = Vec::new();
+    match sys.mounts() {
+        Ok(mounts) => {
+            for mount in mounts.iter() {
+                println!("Mounted on: {}, Total space: {}, Avail space: {}",
+                    mount.fs_mounted_on, mount.total, mount.avail);
+                return_disks.push(mount.clone());
+            }
+        }
+        Err(x) => println!("\nMounts: error: {}", x)
+    }
+    return_disks
 }
 
 fn main() {
