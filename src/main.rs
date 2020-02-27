@@ -1,6 +1,5 @@
 // Bring in external crates fs_extra and twox_hash
 // More will probably be needed as I disocver which are necessary
-
 extern crate fs_extra;
 extern crate twox_hash;
 extern crate chrono;
@@ -27,6 +26,10 @@ use regex::Regex;
 
 // Bring in systemstat
 use systemstat::{System, Filesystem, Platform};
+use data_encoding::HEXUPPER;
+use ring::digest::{Context, Digest, SHA256};
+use std::fs::File;
+use std::io::{BufReader, Read};
 
 /* Test hashing function
 fn hash_test() {
@@ -181,8 +184,9 @@ fn enumerate_disks(sys: &systemstat::System) -> Vec<systemstat::Filesystem> {
     return_disks
 }
 
+// Super kludgey function to get os type (linux or windows)
 fn determine_os(disk: &systemstat::Filesystem) -> String {
-    let mut operating_system = String::new();
+    let operating_system: String;
     let windows_re = Regex::new(r"^[a-zA-Z]:\\[\\\S|*\S]?.*$").unwrap();
     if windows_re.is_match(&disk.fs_mounted_on) {
         operating_system = String::from("Windows")
@@ -190,6 +194,38 @@ fn determine_os(disk: &systemstat::Filesystem) -> String {
         operating_system = String::from("Linux")
     }
     operating_system
+}
+
+// Iterates over vector of strings, hashes them and outputs hashmap where
+// key = file and value = hash
+fn hash_files(files: Vec<String>) -> HashMap<String, String>{
+    let mut hashed_files = HashMap::new();
+    //let mut file = String::from("");
+    //let mut path: String = String::new();
+    for file in files.iter(){
+        let path = file.clone();
+        let input = File::open(&path);
+        let reader = BufReader::new(input.unwrap());
+        let digest = sha256_digest(reader).unwrap();
+        hashed_files.insert(path, HEXUPPER.encode(digest.as_ref()));
+    }
+    hashed_files
+}
+
+// Helper to hash_files
+fn sha256_digest<R: Read>(mut reader: R) -> Result<Digest> {
+    let mut context = Context::new(&SHA256);
+    let mut buffer = [0; 1024];
+
+    loop {
+        let count = reader.read(&mut buffer)?;
+        if count == 0 {
+            break;
+        }
+        context.update(&buffer[..count]);
+    }
+
+    Ok(context.finish())
 }
 
 fn main() {
