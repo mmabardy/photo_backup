@@ -108,7 +108,7 @@ fn copy_files(source_folder: &str, dest_folder: &str, date_time: &str) -> Result
 }
 
 // This currently only works on windows
-fn search_for_files_win(folder: &mut String, filetype: String) -> Vec<String> {
+fn search_for_files_win(folder: &str, filetype: String) -> Vec<String> {
     //Create new vec of strings
     let mut files = Vec::new();
     //Create new path and push func args together: "DriveRoot\**\*.filetype"
@@ -127,7 +127,7 @@ fn search_for_files_win(folder: &mut String, filetype: String) -> Vec<String> {
 }
 
 //This currently only works for Linux
-fn search_for_files_nux(folder: &mut String, filetype: String) -> Vec<String> {
+fn search_for_files_nux(folder: &str, filetype: String) -> Vec<String> {
     //Create new vec of string
     let mut files = Vec::new();
     //Create new path and push func args together: "/mnt/driveroot/**/*.filetype"
@@ -236,14 +236,38 @@ fn main() {
     let system = System::new();
     let disks = enumerate_disks(&system);
     let largest = get_largest_disk(&disks);
-    println!("Recommended target based on disk size is: {}", largest.fs_mounted_on);
     let operating_system = determine_os(&largest);
-    println!("OS is: {}", operating_system);
-    //println!("Input a source folder: ");
-    //let source = folder_picker();
+    //println!("OS is: {}", operating_system);
+    println!("Recommended target based on disk size is: {}", largest.fs_mounted_on);
+    println!("Input a source folder: ");
+    let mut source = folder_picker();
     //println!("Input a destination folder: ");
     //let destination = folder_picker();
+    let files_to_move: Vec<String>;
+    let hashed_files: HashMap<String, String>;
+    if operating_system == "Windows"{
+        println!("Operating system is: {}", operating_system);
+        files_to_move = search_for_files_win(&source, "exe".to_string());
+        hashed_files = hash_files(files_to_move);
+        for (key, value) in &hashed_files {
+            println!("{}: {}", key, value);
+        }
 
+    } else {
+        println!("Operating system is: {}", operating_system);
+        files_to_move = search_for_files_nux(&source, "exe".to_string());
+        hashed_files = hash_files(files_to_move);
+        for (key, value) in &hashed_files {
+            println!("{}: {}", key, value);
+        }
+    }
+
+    //let mut tempe: String = String::from(r"D:\temp\");
+    //let temp = search_for_files_win(&mut tempe, "exe".to_string());
+    //let file_hash = hash_files(temp);
+    //for (key, value) in &file_hash {
+    //    println!("{}: {}", key, value);
+    //}
 
     
 
@@ -252,8 +276,4 @@ fn main() {
     //} else {
     //    copy_files(&source, &destination, &time).expect("Couldn't copy files");
     //}
-
-    //println!("Source is: {}", source);
-    //println!("Destination is: {}", destination);
-    //hash_test();
 }

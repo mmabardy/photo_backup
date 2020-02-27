@@ -53,3 +53,5 @@ fn example_copy() -> Result<()> {
     Ok(())
 
 }
+let j = serde_json::to_string(&file_hash);
+println!("J: {:?}", j);
