@@ -12,4 +12,4 @@ Goals: Copy files from SD card to an external drive and ensure integrity by conf
 
 Future: would like to target for Raspberry Pi 4, OLED display showing progress w/ progress bar, push buttons for selecting source and destination devices, maybe enable/disable hash checking depending on copy and hash speed
 
-Commit test
+Commit testing
