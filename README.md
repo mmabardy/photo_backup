@@ -12,5 +12,19 @@ Goals: Copy files from SD card to an external drive and ensure integrity by conf
 
 Future: would like to target for Raspberry Pi 4, OLED display showing progress w/ progress bar, push buttons for selecting source and destination devices, maybe enable/disable hash checking depending on copy and hash speed
 
+<b>Application control flow:</b>
+<ol>
+    <li>Generate date-time stamp</li>
+    <li>Determine OS</li>
+    <li>Display list of drives found on system</li>
+    <li>Suggest largest drive as destination</li>
+    <li>Ask for source and destination drives/folders</li>
+    <li>Copy files from source to destination</li>
+    <li>Generate hashes for source files, store as a JSON file</li>
+    <li>Generate hashes for destination files, store as JSON</li>
+    <li>Compare hashes before/after copy</li>
+    <li>If hashes match for all, close out, if not recopy failed files</li>
+</ol>
+
 See reference.rs and read this later: 
 https://serde.rs/derive.html
