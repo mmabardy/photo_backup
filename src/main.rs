@@ -6,6 +6,7 @@ extern crate chrono;
 extern crate regex;
 extern crate glob;
 extern crate systemstat;
+extern crate serde_json;
 // Bring in standard components
 #[allow(unused_imports)]
 use std::{io, collections::HashMap, path::{Path, PathBuf}};
@@ -31,10 +32,9 @@ use ring::digest::{Context, Digest, SHA256};
 use std::fs::File;
 use std::io::{BufReader, Read};
 
-/* Test hashing function
-fn hash_test() {
-    
-} */
+use serde::{Deserialize, Serialize};
+//use serde_json::*;
+
 #[allow(dead_code)]
 struct FolderChoice {
     source: String,
@@ -228,6 +228,25 @@ fn sha256_digest<R: Read>(mut reader: R) -> Result<Digest> {
     Ok(context.finish())
 }
 
+// Accepts date-time stamp, folder/drive from picker, and file/hash hashmap
+// writes hashmap to JSON to root of folder/drive with date-time stamp as file name
+fn write_hash_json(date_time: &str, folder_root: &str, file_hashes: &HashMap<String, String>){
+    // HashMap converted to JSON string here
+    let temp_json_holder = serde_json::to_string(&file_hashes);
+    // Creates new PathBuf starting at &folder_root
+    let mut path = PathBuf::from(&folder_root);
+    // Creates new string with &date_time and appends .json to the end
+    let mut file_name= String::from((&date_time).to_string());
+    file_name.push_str(".json");
+    // Pushes filename created onto path
+    path.push(&file_name);
+    
+    
+    println!("---DEBUG--- path: {}", path.to_string_lossy());
+
+    fs_extra::file::write_all(&path, &temp_json_holder.unwrap()).expect("Couldn't write");
+}
+
 fn main() {
 
     let time = current_date_time();
@@ -237,10 +256,10 @@ fn main() {
     let disks = enumerate_disks(&system);
     let largest = get_largest_disk(&disks);
     let operating_system = determine_os(&largest);
-    //println!("OS is: {}", operating_system);
-    println!("Recommended target based on disk size is: {}", largest.fs_mounted_on);
+    println!("---DEBUG--- OS is: {}", operating_system);
+    println!("Recommended destination based on disk size is: {}", largest.fs_mounted_on);
     println!("Input a source folder: ");
-    let mut source = folder_picker();
+    let source = folder_picker();
     //println!("Input a destination folder: ");
     //let destination = folder_picker();
     let files_to_move: Vec<String>;
