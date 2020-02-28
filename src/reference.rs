@@ -55,3 +55,11 @@ fn example_copy() -> Result<()> {
 }
 let j = serde_json::to_string(&file_hash);
 println!("J: {:?}", j);
+
+let temp5 = folder_validator2(r"D:\");
+fn folder_validator2(folder_input: &str) -> std::result::Result<String, io::Error>{
+    let mut f = File::open(&folder_input.to_string())?;
+    let mut s = String::new();
+    f.read_to_string(&mut s)?;
+    Ok(s)
+}
