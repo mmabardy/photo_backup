@@ -33,6 +33,10 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 
 use serde::{Deserialize, Serialize};
+
+extern crate dialoguer;
+
+use dialoguer::{theme::ColorfulTheme, Select};
 //use serde_json::*;
 
 #[allow(dead_code)]
@@ -247,6 +251,27 @@ fn write_hash_json(date_time: &str, folder_root: &str, file_hashes: &HashMap<Str
     fs_extra::file::write_all(&path, &temp_json_holder.unwrap()).expect("Couldn't write");
 }
 
+// Kludgey menu, could probably be shortened probably also needs error handling
+// currently panics if you hit a key instead of selecting a value
+fn write_tui (disks: Vec<systemstat::Filesystem>) -> systemstat::Filesystem {
+    let mut selections: Vec<String> = Vec::new();
+    for disk in disks.iter(){
+        let mut temp = &mut disk.fs_mounted_on.to_string();
+        temp.push_str(" Disk size: ");
+        temp.push_str(&disk.total.to_string());
+        selections.push(temp.to_string());
+    }
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Pick a disk")
+        .default(0)
+        .items(&selections[..])
+        .interact_opt()
+        .unwrap();
+    let temp = disks[selection.unwrap() as usize].clone();
+    println!("Temp: {:?}", temp);
+    return temp;
+}
+
 fn main() {
 
     let time = current_date_time();
@@ -256,6 +281,7 @@ fn main() {
     let disks = enumerate_disks(&system);
     let largest = get_largest_disk(&disks);
     let operating_system = determine_os(&largest);
+    write_tui(disks);
     println!("---DEBUG--- OS is: {}", operating_system);
     println!("Recommended destination based on disk size is: {}", largest.fs_mounted_on);
     println!("Input a source folder: ");
