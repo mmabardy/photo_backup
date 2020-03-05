@@ -259,6 +259,8 @@ fn write_tui (disks: Vec<systemstat::Filesystem>) -> systemstat::Filesystem {
         let mut temp = &mut disk.fs_mounted_on.to_string();
         temp.push_str(" Disk size: ");
         temp.push_str(&disk.total.to_string());
+        temp.push_str(" Available space: ");
+        temp.push_str(&disk.avail.to_string());
         selections.push(temp.to_string());
     }
     let selection = Select::with_theme(&ColorfulTheme::default())
