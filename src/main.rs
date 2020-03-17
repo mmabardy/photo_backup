@@ -1,19 +1,13 @@
 // Bring in external crates fs_extra and twox_hash
 // More will probably be needed as I disocver which are necessary
-extern crate fs_extra;
-extern crate twox_hash;
-extern crate chrono;
-extern crate regex;
-extern crate glob;
-extern crate systemstat;
-extern crate serde_json;
+
 // Bring in standard components
 #[allow(unused_imports)]
 use std::{io, collections::HashMap, path::{Path, PathBuf}};
 use glob::glob;
 
 // Bring in fs_extra components
-use fs_extra::{dir::*, error::*};
+use fs_extra::{dir::*, error::*, file::write_all};
 
 // Bring in chrono components
 use chrono::{DateTime, Local};
@@ -33,8 +27,6 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 
 use serde::{Deserialize, Serialize};
-
-extern crate dialoguer;
 
 use dialoguer::{theme::ColorfulTheme, Select};
 //use serde_json::*;
@@ -150,7 +142,7 @@ fn search_for_files_nux(folder: &str, filetype: String) -> Vec<String> {
 }
 
 // Accepts a vector of UNWRAPPED filesystem mounts, returns string of mount with largest size
-fn get_largest_disk(disks: &Vec<Filesystem>) -> Filesystem {
+fn get_largest_disk(disks: &[Filesystem]) -> Filesystem {
     // get number of elements in vector
     let mount_points = disks.len();
 
@@ -240,7 +232,7 @@ fn write_hash_json(date_time: &str, folder_root: &str, file_hashes: &HashMap<Str
     // Creates new PathBuf starting at &folder_root
     let mut path = PathBuf::from(&folder_root);
     // Creates new string with &date_time and appends .json to the end
-    let mut file_name= String::from((&date_time).to_string());
+    let mut file_name= String::from(*(&date_time));
     file_name.push_str(".json");
     // Pushes filename created onto path
     path.push(&file_name);
@@ -248,7 +240,7 @@ fn write_hash_json(date_time: &str, folder_root: &str, file_hashes: &HashMap<Str
     
     println!("---DEBUG--- path: {}", path.to_string_lossy());
 
-    fs_extra::file::write_all(&path, &temp_json_holder.unwrap()).expect("Couldn't write");
+    write_all(&path, &temp_json_holder.unwrap()).expect("Couldn't write");
 }
 
 // Kludgey menu, could probably be shortened probably also needs error handling
@@ -256,12 +248,12 @@ fn write_hash_json(date_time: &str, folder_root: &str, file_hashes: &HashMap<Str
 fn write_tui (disks: Vec<systemstat::Filesystem>) -> systemstat::Filesystem {
     let mut selections: Vec<String> = Vec::new();
     for disk in disks.iter(){
-        let mut temp = &mut disk.fs_mounted_on.to_string();
+        let temp = &mut disk.fs_mounted_on.to_string();
         temp.push_str(" Disk size: ");
         temp.push_str(&disk.total.to_string());
         temp.push_str(" Available space: ");
         temp.push_str(&disk.avail.to_string());
-        selections.push(temp.to_string());
+        selections.push((*temp).to_string());
     }
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Pick a disk")
